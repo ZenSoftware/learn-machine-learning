@@ -104,6 +104,7 @@ specifiers:
   jest-preset-angular: ~12.2.6
   localstorage-slim: ^2.3.0
   material-design-icons: ^3.0.1
+  ng2-charts: ^4.1.1
   nodemailer: ^6.9.1
   nx: 15.6.2
   passport: ^0.6.0
@@ -236,6 +237,7 @@ devDependencies:
   jest-preset-angular: 12.2.6_7hfljvixubhgazk36vmo7l7rr4
   localstorage-slim: 2.3.0
   material-design-icons: 3.0.1
+  ng2-charts: 4.1.1_k557fifsbx7a5myfrkqccitpra
   nx: 15.6.2
   prettier: 2.8.3
   prettier-plugin-import-sort: 0.0.7_prettier@2.8.3
@@ -17981,6 +17983,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
 
+  /lodash-es/4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: true
+
   /lodash.debounce/4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: true
@@ -19170,6 +19176,23 @@ packages:
   /new-github-issue-url/0.2.1:
     resolution: {integrity: sha512-md4cGoxuT4T4d/HDOXbrUHkTKrp/vp+m3aOA7XXVYwNsUNMK49g3SQicTSeV5GIz/5QVGAeYRAOlyp9OvlgsYA==}
     engines: {node: '>=10'}
+
+  /ng2-charts/4.1.1_k557fifsbx7a5myfrkqccitpra:
+    resolution: {integrity: sha512-iHwXDbmX86lfeH8VRcsaW2tJATsuAZo4kvvC/Yk2l35zOHjevja1qBvO6BAibiDazi9r9aS6ZRJOqWPsz1pP2w==}
+    peerDependencies:
+      '@angular/cdk': '>=14.0.0'
+      '@angular/common': '>=14.0.0'
+      '@angular/core': '>=14.0.0'
+      chart.js: ^3.4.0 || ^4.0.0
+      rxjs: ^6.5.3 || ^7.4.0
+    dependencies:
+      '@angular/cdk': 15.1.2_pubfhxqcqejsenz5amhpwt3pua
+      '@angular/common': 15.1.2_77moedl5bs7lqwcv53ddrcqlqi
+      '@angular/core': 15.1.2_rxjs@7.8.0+zone.js@0.11.8
+      lodash-es: 4.17.21
+      rxjs: 7.8.0
+      tslib: 2.5.0
+    dev: true
 
   /nice-napi/1.0.2:
     resolution: {integrity: sha512-px/KnJAJZf5RuBGcfD+Sp2pAKq0ytz8j+1NehvgIGFkvtvFrDM3T8E4x/JJODXK9WZow8RRGrbA9QQ3hs+pDhA==}
