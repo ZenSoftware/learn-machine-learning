@@ -12,6 +12,7 @@ import { ZenGraphQLModule } from '@zen/graphql';
 import { possibleTypes, typePolicies } from '@zen/graphql/client';
 import { ZenLayoutModule } from '@zen/layout';
 import { ZenMainModule } from '@zen/main';
+import { ZenMLModule } from '@zen/ml';
 
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -27,6 +28,7 @@ import { AppComponent } from './app.component';
     ZenAuthModule,
     ZenLayoutModule,
     ZenMainModule,
+    ZenMLModule,
     ZenGraphQLModule.forRoot({
       cacheOptions: {
         possibleTypes,
