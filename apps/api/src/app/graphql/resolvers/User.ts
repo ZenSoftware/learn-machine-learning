@@ -1,13 +1,15 @@
 import { subject } from '@casl/ability';
 import { ForbiddenException, Inject, UseGuards } from '@nestjs/common';
 import { Args, Info, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import type { NonNullableFields } from '@zen/common';
 import { CaslAbility, CaslGuard } from '@zen/nest-auth';
 import { GraphQLResolveInfo } from 'graphql';
 import { gql } from 'graphql-tag';
 
-import { AppAbility, AuthService, DEFAULT_FIELDS_TOKEN } from '../../auth';
+import { AuthService, DEFAULT_FIELDS_TOKEN } from '../../auth';
+import type { AppAbility } from '../../auth';
 import { DefaultFields, PrismaSelectService, PrismaService, User } from '../../prisma';
-import {
+import type {
   AggregateUserArgs,
   CreateOneUserArgs,
   DeleteManyUserArgs,
@@ -18,8 +20,6 @@ import {
   UpdateManyUserArgs,
   UpdateOneUserArgs,
   UpsertOneUserArgs,
-  UserWhereInput,
-  UserWhereUniqueInput,
 } from '../resolversTypes';
 
 export const typeDefs = gql`
@@ -51,7 +51,7 @@ export class UserResolver {
 
   @Query()
   async findUniqueUser(
-    @Args() args: FindUniqueUserArgs,
+    @Args() args: NonNullableFields<FindUniqueUserArgs>,
     @Info() info: GraphQLResolveInfo,
     @CaslAbility() ability: AppAbility
   ) {
@@ -64,7 +64,7 @@ export class UserResolver {
 
   @Query()
   async findFirstUser(
-    @Args() args: FindFirstUserArgs,
+    @Args() args: NonNullableFields<FindFirstUserArgs>,
     @Info() info: GraphQLResolveInfo,
     @CaslAbility() ability: AppAbility
   ) {
@@ -122,12 +122,12 @@ export class UserResolver {
 
   @Mutation()
   async updateOneUser(
-    @Args() args: UpdateOneUserArgs,
+    @Args() args: NonNullableFields<UpdateOneUserArgs>,
     @Info() info: GraphQLResolveInfo,
     @CaslAbility() ability: AppAbility
   ) {
     const record = await this.prisma.user.findUnique({
-      where: args.where as UserWhereUniqueInput,
+      where: args.where,
       select: this.defaultFields.User,
     });
     if (ability.cannot('update', subject('User', record as User))) throw new ForbiddenException();
@@ -171,12 +171,12 @@ export class UserResolver {
 
   @Mutation()
   async deleteOneUser(
-    @Args() args: DeleteOneUserArgs,
+    @Args() args: NonNullableFields<DeleteOneUserArgs>,
     @Info() info: GraphQLResolveInfo,
     @CaslAbility() ability: AppAbility
   ) {
     const record = await this.prisma.user.findUnique({
-      where: args.where as UserWhereUniqueInput,
+      where: args.where,
       select: this.defaultFields.User,
     });
     if (ability.cannot('delete', subject('User', record as User))) throw new ForbiddenException();
@@ -190,7 +190,7 @@ export class UserResolver {
     @CaslAbility() ability: AppAbility
   ) {
     const records = await this.prisma.user.findMany({
-      where: args.where as UserWhereInput,
+      where: args.where,
       select: this.defaultFields.User,
     });
     for (const record of records) {
