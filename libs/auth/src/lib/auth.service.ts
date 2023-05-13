@@ -1,24 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { ApolloError } from '@apollo/client/errors';
 import { Ability } from '@casl/ability';
 import { Environment } from '@zen/common';
 import {
-  ApiError,
   AuthExchangeTokenGQL,
   AuthLoginGQL,
   AuthLoginInput,
   AuthSession,
   GetAccountInfoGQL,
-  GqlErrors,
-  parseGqlErrors,
 } from '@zen/graphql';
-import { loggedInVar, userRolesVar } from '@zen/graphql/client';
 import { Apollo } from 'apollo-angular';
 import ls from 'localstorage-slim';
 import { Subscription, interval, map, share, throwError, timer } from 'rxjs';
-import { catchError, retry, tap } from 'rxjs/operators';
+import { retry, tap } from 'rxjs/operators';
 
-import { tokenVar } from './token-var';
+import { token } from './token.signal';
 
 export enum LocalStorageKey {
   userId = 'userId',
@@ -33,6 +30,9 @@ export enum LocalStorageKey {
   providedIn: 'root',
 })
 export class AuthService {
+  readonly loggedIn = signal(false);
+  readonly userRoles = signal<string[]>([]);
+
   #exchangeIntervalSubscription?: Subscription;
 
   #userId: AuthSession['userId'] | null = null;
@@ -63,11 +63,11 @@ export class AuthService {
       try {
         // Initialize Apollo client state
         const roles = ls.get<string[]>(LocalStorageKey.roles, { decrypt: true });
-        userRolesVar(roles ? roles : []);
-        loggedInVar(roles ? true : false);
+        this.userRoles.set(roles ? roles : []);
+        this.loggedIn.set(roles ? true : false);
         this.#userId = ls.get(LocalStorageKey.userId, { decrypt: true });
 
-        const rules: Array<unknown> | null = ls.get(LocalStorageKey.rules, { decrypt: true });
+        const rules: Array<any> | null = ls.get(LocalStorageKey.rules, { decrypt: true });
         if (Array.isArray(rules)) this.ability.update(rules);
 
         switch (env.auth.exchangeStrategy) {
@@ -98,7 +98,6 @@ export class AuthService {
 
   login(data: AuthLoginInput) {
     return this.authLoginGQL.fetch({ data }, { fetchPolicy: 'no-cache' }).pipe(
-      catchError(parseGqlErrors),
       tap(({ data: { authLogin } }) => {
         this.setSession(authLogin);
       })
@@ -126,18 +125,18 @@ export class AuthService {
 
     this.ability.update(authSession.rules);
 
-    tokenVar(authSession.token);
+    token.set(authSession.token);
 
     if (
-      !this.rolesEqual(this.roles, authSession.roles) ||
-      this.roles === null ||
-      this.roles === undefined
+      !this.rolesEqual(this.userRoles(), authSession.roles) ||
+      this.userRoles() === null ||
+      this.userRoles() === undefined
     ) {
-      userRolesVar(authSession.roles);
+      this.userRoles.set(authSession.roles);
     }
 
-    if (!this.loggedIn) {
-      loggedInVar(true);
+    if (!this.loggedIn()) {
+      this.loggedIn.set(true);
     }
 
     this.startExchangeInterval();
@@ -171,26 +170,18 @@ export class AuthService {
 
   userHasRole(role: string | string[]) {
     if (role) {
-      if (typeof role === 'string') return this.roles.some(r => r === role);
-      else return this.roles.some(r => role.includes(r));
+      if (typeof role === 'string') return this.userRoles().some(r => r === role);
+      else return this.userRoles().some(r => role.includes(r));
     }
     return false;
   }
 
   userNotInRole(role: string | string[]) {
     if (role) {
-      if (typeof role === 'string') return !this.roles.some(r => r === role);
-      return this.roles.filter(r => role.includes(r)).length === 0;
+      if (typeof role === 'string') return !this.userRoles().some(r => r === role);
+      return this.userRoles().filter(r => role.includes(r)).length === 0;
     }
     return true;
-  }
-
-  get roles() {
-    return userRolesVar();
-  }
-
-  get loggedIn() {
-    return loggedInVar();
   }
 
   private get rememberMe() {
@@ -222,9 +213,9 @@ export class AuthService {
 
     this.#userId = null;
     this.ability.update([]);
-    tokenVar(null);
-    userRolesVar([]);
-    loggedInVar(false);
+    token.set(null);
+    this.userRoles.set([]);
+    this.loggedIn.set(false);
     this.apollo.client.cache.reset();
   }
 
@@ -235,7 +226,6 @@ export class AuthService {
         { fetchPolicy: 'no-cache' }
       )
       .pipe(
-        catchError(parseGqlErrors),
         retry({
           delay: retryStrategy({
             excludeStatusCodes: ['FORBIDDEN', 'UNAUTHENTICATED', 'INTERNAL_SERVER_ERROR'],
@@ -247,9 +237,9 @@ export class AuthService {
           this.setSession(authExchangeToken);
           console.log('Exchanged token');
         },
-        error: (errors: GqlErrors) => {
+        error: (error: ApolloError) => {
           this.logout();
-          console.error('Exchange token failed', errors);
+          console.error('Exchange token failed', error);
         },
       });
   }
@@ -282,24 +272,16 @@ function retryStrategy({
   delay?: number;
   excludeStatusCodes?: string[];
 }) {
-  return (errors: GqlErrors, retryCount: number) => {
-    const codes = errors.original?.graphQLErrors?.reduce((accum, e) => {
-      const status = e?.extensions?.code;
-      if (status) accum.push(status);
-      return accum;
-    }, [] as string[]);
-
-    const excludedStatusFound = !!codes.find(status =>
-      excludeStatusCodes.find(exclude => exclude === status)
-    );
+  return (error: ApolloError, retryCount: number) => {
+    const excludedStatusFound = !!excludeStatusCodes.find(exclude => exclude === error.message);
 
     if (retryCount > maxAttempts || excludedStatusFound) {
-      return throwError(() => errors);
+      return throwError(() => error);
     }
 
     console.warn(
       `Exchange token attempt ${retryCount}. Retrying in ${Math.round(delay / 1000)}s`,
-      errors
+      error
     );
 
     return timer(delay);

@@ -1,7 +1,6 @@
-import { Meta, Story, moduleMetadata } from '@storybook/angular';
+import { Meta, moduleMetadata } from '@storybook/angular';
 import { AuthRegisterGQL } from '@zen/graphql';
 
-import { AUTH_DECLARATIONS, AUTH_IMPORTS, AUTH_PROVIDERS } from '../test-deps';
 import { ZenRegisterFormComponent } from './zen-register-form.component';
 
 export default {
@@ -9,16 +8,14 @@ export default {
   component: ZenRegisterFormComponent,
   decorators: [
     moduleMetadata({
-      imports: AUTH_IMPORTS,
-      providers: [...AUTH_PROVIDERS, AuthRegisterGQL],
-      declarations: AUTH_DECLARATIONS,
+      providers: [AuthRegisterGQL],
     }),
   ],
 } as Meta<ZenRegisterFormComponent>;
 
-const Template: Story<ZenRegisterFormComponent> = (args: ZenRegisterFormComponent) => ({
-  props: args,
-});
-
-export const Primary = Template.bind({});
-Primary.args = {};
+export const Primary = {
+  render: (args: ZenRegisterFormComponent) => ({
+    props: args,
+  }),
+  args: {},
+};

@@ -1,7 +1,6 @@
-import { Meta, Story, moduleMetadata } from '@storybook/angular';
+import { Meta, moduleMetadata } from '@storybook/angular';
 import { AuthPasswordResetConfirmationGQL } from '@zen/graphql';
 
-import { AUTH_DECLARATIONS, AUTH_IMPORTS, AUTH_PROVIDERS } from '../test-deps';
 import { ZenPasswordResetConfirmationFormComponent } from './zen-password-reset-confirmation-form.component';
 
 export default {
@@ -9,21 +8,16 @@ export default {
   component: ZenPasswordResetConfirmationFormComponent,
   decorators: [
     moduleMetadata({
-      imports: AUTH_IMPORTS,
-      providers: [...AUTH_PROVIDERS, AuthPasswordResetConfirmationGQL],
-      declarations: AUTH_DECLARATIONS,
+      providers: [AuthPasswordResetConfirmationGQL],
     }),
   ],
+} as Meta<ZenPasswordResetConfirmationFormComponent>;
+
+export const Primary = {
+  render: (args: ZenPasswordResetConfirmationFormComponent) => ({
+    props: args,
+  }),
   args: {
     redirectTime: 5,
   },
-} as Meta<ZenPasswordResetConfirmationFormComponent>;
-
-const Template: Story<ZenPasswordResetConfirmationFormComponent> = (
-  args: ZenPasswordResetConfirmationFormComponent
-) => ({
-  props: args,
-});
-
-export const Primary = Template.bind({});
-Primary.args = {};
+};

@@ -1,3 +1,4 @@
+import { NgIf } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
@@ -9,16 +10,27 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ZenLoadingComponent } from '@zen/components';
 import {
   AuthPasswordResetConfirmation,
   AuthPasswordResetConfirmationGQL,
   AuthPasswordResetConfirmationInput,
-  parseGqlErrors,
 } from '@zen/graphql';
 import { Subscription } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { verticalAccordion } from '../animations';
 import { AuthService } from '../auth.service';
@@ -34,6 +46,18 @@ interface FormType {
   templateUrl: 'zen-password-reset-confirmation-form.component.html',
   animations: [...verticalAccordion],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatProgressBarModule,
+    NgIf,
+    ReactiveFormsModule,
+    RouterLink,
+    ZenLoadingComponent,
+  ],
 })
 export class ZenPasswordResetConfirmationFormComponent implements AfterContentInit, OnDestroy {
   @ViewChild('passwordInput') passwordInput!: ElementRef<HTMLInputElement>;
@@ -62,10 +86,10 @@ export class ZenPasswordResetConfirmationFormComponent implements AfterContentIn
   });
 
   constructor(
+    private auth: AuthService,
     private authPasswordResetConfirmationGQL: AuthPasswordResetConfirmationGQL,
     private route: ActivatedRoute,
-    public router: Router,
-    private auth: AuthService
+    public router: Router
   ) {
     const sub = this.route.queryParamMap
       .pipe(map(params => params.get('token')))
@@ -122,7 +146,6 @@ export class ZenPasswordResetConfirmationFormComponent implements AfterContentIn
           },
           { fetchPolicy: 'no-cache' }
         )
-        .pipe(catchError(parseGqlErrors))
         .subscribe({
           next: ({ data }) => {
             this.loading = false;

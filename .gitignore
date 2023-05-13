@@ -2,15 +2,13 @@
 
 /.env
 /apps/**/prisma/generated/
-
-# documentation
-/doc-*
+.angular
+**/cypress/downloads
 
 # compiled output
 dist
 tmp
 /out-tsc
-.angular
 
 # dependencies
 node_modules

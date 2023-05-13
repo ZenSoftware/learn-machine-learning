@@ -1,10 +1,11 @@
+import { NgClass, NgIf } from '@angular/common';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Component } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ZenSnackbarError } from '@zen/components';
-import { GqlErrors, SampleUploadGQL, parseGqlErrors } from '@zen/graphql';
+import { ZenLoadingComponent, ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
+import { SampleUploadGQL } from '@zen/graphql';
 import gql from 'graphql-tag';
-import { catchError } from 'rxjs/operators';
 
 gql`
   mutation SampleUpload($file: Upload!) {
@@ -16,6 +17,8 @@ gql`
   selector: 'zen-sample-upload',
   styleUrls: ['zen-sample-upload.component.scss'],
   templateUrl: 'zen-sample-upload.component.html',
+  standalone: true,
+  imports: [MatButtonModule, NgClass, NgIf, ZenLoadingComponent, ZenSnackbarModule],
 })
 export class ZenSampleUploadComponent {
   @ViewChild('fileInput', { static: true })
@@ -49,7 +52,6 @@ export class ZenSampleUploadComponent {
       .mutate({
         file: this.file,
       })
-      .pipe(catchError(parseGqlErrors))
       .subscribe({
         next: () => {
           this.isUploading = false;
@@ -57,9 +59,9 @@ export class ZenSampleUploadComponent {
           this.reset();
         },
 
-        error: (errors: GqlErrors) => {
+        error: e => {
           this.isUploading = false;
-          this.snackbarError.open(errors);
+          this.snackbarError.open(e);
         },
       });
   }

@@ -70,8 +70,8 @@ npm start
 - [x] `Sign in with Google` via OpenID Connect.
 - [x] `Forgot password component` and full password reset flow.
 - [x] `Password change component` for user dashboards.
-- [x] [Nest guards & directives](https://github.com/ZenSoftware/zen/blob/base/apps/api/src/app/auth) for both RBAC & ABAC authorization schemes.  ABAC is implemented with [@casl/prisma](https://casl.js.org/v6/en/package/casl-prisma) & [@casl/angular](https://casl.js.org/v6/en/package/casl-angular).  The user's Casl rules are sent from the server to the client and updates the `@casl/angular` ability.  This unifies the permissions across both the server and the client. Fully exploiting Casl's isomorphic capabilities.
-- [x] `Angular route guards` and `Angular directives` to show/hide content depending on the user's roles or Casl abilities.
+- [x] [Nest guards & directives](https://github.com/ZenSoftware/zen/blob/base/apps/api/src/app/auth) for both RBAC & ABAC authorization schemes.  ABAC is implemented with [@casl/prisma](https://casl.js.org/v6/en/package/casl-prisma) & [@casl/angular](https://casl.js.org/v6/en/package/casl-angular).  The user's CASL rules are sent from the server to the client and updates the `@casl/angular` ability.  This unifies the permissions across both the server and the client. Fully exploiting CASL's isomorphic capabilities.
+- [x] `Angular route guards` and `Angular directives` to show/hide content depending on the user's roles or CASL abilities.
 
 ---
 
@@ -105,4 +105,3 @@ npm start
 - [x] Enforced code formatting via [Prettier](https://prettier.io/) & [import-sort](https://www.npmjs.com/package/prettier-plugin-import-sort), guaranteeing all contributions to the project are standardized with predictable structure and clear legibility.
 - [x] [Commitizen](https://github.com/commitizen/cz-cli) for standardizing git commits.
 - [x] [@nestjs-modules/mailer](https://github.com/nest-modules/mailer) for automated emailing and pre-configured [Handlebars e-mail templates](https://handlebarsjs.com/guide/#what-is-handlebars) for the various web portal's emailing needs. Handlebars has similar double bracket `{{contextField}}` template interpolation, akin to Angular templates. Custom HTML e-mail triggers within Nest are made very simple by simply passing a `JSON context` and the template's `filename` as parameters to the class injectable `MailService`.
-- [x] [Compodoc](https://compodoc.app/) to generate Nest & Angular documentation.
