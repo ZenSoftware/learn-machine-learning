@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartDataset, Point } from 'chart.js';
 import * as math from 'mathjs';
 import { BaseChartDirective } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 
 const CONFIG = {
   idealized: (x: number) => -26 + 4.7 * x,
@@ -14,6 +15,8 @@ const CONFIG = {
 @Component({
   selector: 'zen-logistic-regression',
   templateUrl: 'zen-logistic-regression.component.html',
+  standalone: true,
+  imports: [NgChartsModule],
 })
 export class ZenLogisticRegressionComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;

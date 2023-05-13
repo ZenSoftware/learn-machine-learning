@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartDataset, Point } from 'chart.js';
 import * as math from 'mathjs';
 import { BaseChartDirective } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 
 interface LocalParameters {
   x: number;
@@ -24,6 +25,8 @@ const CONFIG = {
 @Component({
   selector: 'zen-local-lg',
   templateUrl: 'zen-local-lg.component.html',
+  standalone: true,
+  imports: [NgChartsModule],
 })
 export class ZenLocalLGComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;

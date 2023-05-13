@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartDataset, Point } from 'chart.js';
 import * as math from 'mathjs';
 import { BaseChartDirective } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 
 const CONFIG = {
   idealized: (x: number) => 80 - 0.7 * x,
@@ -16,6 +17,8 @@ const CONFIG = {
 @Component({
   selector: 'zen-lg',
   templateUrl: 'zen-lg.component.html',
+  standalone: true,
+  imports: [NgChartsModule],
 })
 export class ZenLGComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;

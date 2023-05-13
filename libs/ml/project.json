@@ -1,12 +1,13 @@
 {
   "name": "ml",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
   "sourceRoot": "libs/ml/src",
   "prefix": "zen",
+  "tags": [],
+  "projectType": "library",
   "targets": {
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "libs/ml/jest.config.ts",
@@ -20,12 +21,42 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/ml/**/*.ts", "libs/ml/**/*.html"]
       }
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "port": 4400,
+        "configDir": "libs/ml/.storybook",
+        "browserTarget": "ml:build-storybook",
+        "compodoc": false,
+        "styles": ["apps/portal/src/styles.scss"]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "outputDir": "dist/storybook/ml",
+        "configDir": "libs/ml/.storybook",
+        "browserTarget": "ml:build-storybook",
+        "compodoc": false,
+        "styles": ["apps/portal/src/styles.scss"]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
     }
-  },
-  "tags": []
+  }
 }
