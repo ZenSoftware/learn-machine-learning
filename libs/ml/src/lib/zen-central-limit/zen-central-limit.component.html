@@ -1,0 +1,26 @@
+<div class="card">
+  <div class="card-header">
+    <h1 class="mb-0">Central Limit Theorem</h1>
+  </div>
+  <div class="card-body">
+    <div class="d-flex justify-content-center">
+      <div style="display: inline-block;">
+
+        <div class="text-center">
+          <button type="button" mat-raised-button (click)="update()" class="me-4">Update</button>
+        </div>
+
+        <canvas baseChart #chart
+          [datasets]="datasets"
+          [options]="options"
+          [width]="1200"
+          [height]="800"
+          [type]="'scatter'">
+        </canvas>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
