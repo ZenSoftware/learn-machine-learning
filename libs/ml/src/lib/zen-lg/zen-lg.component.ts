@@ -25,7 +25,7 @@ export class ZenLGComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
   parameters: number[] = [];
-  closedFormRegression = math.compile('(X_transposed * X)^-1 * X_transposed * Y');
+  closedFormRegression = math.compile('(x_transposed * x)^-1 * x_transposed * y');
 
   datasets: ChartConfiguration<'scatter'>['data']['datasets'] = [
     {
@@ -137,18 +137,18 @@ export class ZenLGComponent {
 
   getData() {
     const sampleDataset = this.getDataset('Sample');
-    const X: number[][] = [];
-    const Y: number[][] = [];
+    const x: number[][] = [];
+    const y: number[][] = [];
 
     for (const point of sampleDataset.data) {
-      X.push([point.x]);
-      Y.push([point.y]);
+      x.push([point.x]);
+      y.push([point.y]);
     }
 
-    const X_withIntecept = math.concat(math.ones(X.length, 1), X);
-    const X_transposed = math.transpose(X_withIntecept);
+    const x_withIntecept = math.concat(math.ones(x.length, 1), x);
+    const x_transposed = math.transpose(x_withIntecept);
 
-    return { X: X_withIntecept, X_transposed, Y };
+    return { x: x_withIntecept, x_transposed, y };
   }
 
   generateSampleData() {
