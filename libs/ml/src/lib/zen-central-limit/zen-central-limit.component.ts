@@ -1,4 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { ChartConfiguration, Point } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { NgChartsModule } from 'ng2-charts';
@@ -7,7 +8,7 @@ import { NgChartsModule } from 'ng2-charts';
   selector: 'zen-central-limit',
   templateUrl: 'zen-central-limit.component.html',
   standalone: true,
-  imports: [NgChartsModule],
+  imports: [MatButtonModule, NgChartsModule],
 })
 export class ZenCentralLimitComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;

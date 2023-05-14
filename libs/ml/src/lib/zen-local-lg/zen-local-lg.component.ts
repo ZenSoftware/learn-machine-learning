@@ -1,4 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { ChartConfiguration, ChartDataset, Point } from 'chart.js';
 import * as math from 'mathjs';
 import { BaseChartDirective } from 'ng2-charts';
@@ -26,7 +27,7 @@ const CONFIG = {
   selector: 'zen-local-lg',
   templateUrl: 'zen-local-lg.component.html',
   standalone: true,
-  imports: [NgChartsModule],
+  imports: [MatButtonModule, NgChartsModule],
 })
 export class ZenLocalLGComponent {
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
