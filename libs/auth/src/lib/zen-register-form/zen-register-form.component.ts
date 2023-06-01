@@ -3,7 +3,6 @@ import {
   AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   EventEmitter,
   OnDestroy,
   Output,
@@ -35,7 +34,11 @@ import { Subscription } from 'rxjs';
 
 import { verticalAccordion } from '../animations';
 import { AuthService } from '../auth.service';
-import { emailValidator, passwordValidatorFn, usernameValidator } from '../validators';
+import {
+  ZenEmailInputComponent,
+  ZenPasswordInputComponent,
+  ZenUsernameInputComponent,
+} from '../inputs';
 
 interface FormType {
   username: FormControl<AuthRegisterInput['username']>;
@@ -59,33 +62,25 @@ interface FormType {
     MatInputModule,
     NgIf,
     ReactiveFormsModule,
+    ZenEmailInputComponent,
     ZenLoadingComponent,
+    ZenUsernameInputComponent,
+    ZenPasswordInputComponent,
   ],
 })
 export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {
-  @ViewChild('usernameInput') usernameInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('emailInput') emailInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('usernameInput') usernameInput!: ZenUsernameInputComponent;
+  @ViewChild('emailInput') emailInput!: ZenEmailInputComponent;
   @Output() registered = new EventEmitter<AuthSession>();
 
   #subs: Subscription[] = [];
-  #usernameTaken = false;
-  #emailTaken = false;
   loading = false;
   generalError = false;
   hidePassword = true;
   form = new FormGroup<FormType>({
-    username: new FormControl('', {
-      validators: [Validators.required, usernameValidator(), this.usernameTakenValidator()],
-      nonNullable: true,
-    }),
-    email: new FormControl('', {
-      validators: [Validators.required, emailValidator(), this.emailTakenValidator()],
-      nonNullable: true,
-    }),
-    password: new FormControl('', {
-      validators: [Validators.required, this.passwordValidator()],
-      nonNullable: true,
-    }),
+    username: new FormControl(),
+    email: new FormControl(),
+    password: new FormControl(),
     passwordConfirm: new FormControl('', {
       validators: [Validators.required, this.passwordConfirmValidator()],
       nonNullable: true,
@@ -100,21 +95,15 @@ export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {
     private auth: AuthService,
     private authRegisterGQL: AuthRegisterGQL,
     public env: Environment
-  ) {
-    const sub1 = this.username.valueChanges.subscribe(() => {
-      this.#usernameTaken = false;
-    });
-    this.#subs.push(sub1);
-
-    const sub2 = this.email.valueChanges.subscribe(() => {
-      this.#emailTaken = false;
-    });
-    this.#subs.push(sub2);
-  }
+  ) {}
 
   ngAfterContentInit() {
     setTimeout(() => {
-      this.usernameInput.nativeElement.select();
+      this.usernameInput.select();
+    });
+
+    this.password.valueChanges.subscribe(() => {
+      this.passwordConfirm.updateValueAndValidity();
     });
   }
 
@@ -136,30 +125,6 @@ export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {
 
   get acceptTerms() {
     return this.form.get('acceptTerms') as FormType['acceptTerms'];
-  }
-
-  usernameTakenValidator(): ValidatorFn {
-    return () => {
-      if (this.#usernameTaken) return { usernameTaken: true };
-      return null;
-    };
-  }
-
-  emailTakenValidator(): ValidatorFn {
-    return () => {
-      if (this.#emailTaken) return { emailTaken: true };
-      return null;
-    };
-  }
-
-  passwordValidator(): ValidatorFn {
-    return control => {
-      if (this.form) {
-        this.passwordConfirm.updateValueAndValidity();
-        return passwordValidatorFn(control);
-      }
-      return null;
-    };
   }
 
   passwordConfirmValidator(): ValidatorFn {
@@ -202,14 +167,12 @@ export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {
 
             if (error.message === ApiError.AuthRegister.EMAIL_TAKEN) {
               this.generalError = false;
-              this.#emailTaken = true;
-              this.email.updateValueAndValidity();
-              this.emailInput.nativeElement.select();
+              this.emailInput.customErrorMessage = 'E-mail is already taken';
+              this.emailInput.select();
             } else if (error.message === ApiError.AuthRegister.USERNAME_TAKEN) {
               this.generalError = false;
-              this.#usernameTaken = true;
-              this.username.updateValueAndValidity();
-              this.usernameInput.nativeElement.select();
+              this.usernameInput.customErrorMessage = 'Username is already taken';
+              this.usernameInput.select();
             }
           },
         });

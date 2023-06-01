@@ -1,4 +1,5 @@
-import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
+import { PathLike, createWriteStream } from 'node:fs';
+import { mkdir, stat } from 'node:fs/promises';
 
 import { Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
@@ -9,6 +10,10 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { interval } from 'rxjs';
 
 import type { Upload } from '../models';
+
+const UPLOADS_PATH = './uploads/';
+const logger = new Logger('SampleResolver');
+const pubSub = new PubSub();
 
 export const typeDefs = gql`
   extend type Mutation {
@@ -25,7 +30,21 @@ export const typeDefs = gql`
   }
 `;
 
-const pubSub = new PubSub();
+async function fileExists(path: PathLike) {
+  try {
+    await stat(path);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function createUploadDirectory() {
+  if (!(await fileExists(UPLOADS_PATH))) {
+    logger.log(`Creating directory ${UPLOADS_PATH}`);
+    await mkdir(UPLOADS_PATH);
+  }
+}
 
 interval(1000).subscribe(i =>
   pubSub.publish('sampleSubscription', {
@@ -40,46 +59,46 @@ interval(1000).subscribe(i =>
 export class SampleResolver {
   @Mutation()
   async sampleUpload(@Args('file', { type: () => GraphQLUpload }) file: Upload) {
-    const readStream = file.createReadStream();
-    const chunks: any[] = [];
-    for await (const chunk of readStream) {
-      chunks.push(chunk);
-    }
-    const buffer = Buffer.concat(chunks);
-    Logger.log(`Recieved '${file.filename}' ${buffer.byteLength} bytes`);
+    await createUploadDirectory();
+
+    const { filename, mimetype, encoding, createReadStream } = file;
+
+    createReadStream()
+      .on('error', err => {
+        logger.error(`${filename} ReadStream Error`, err);
+      })
+      .pipe(createWriteStream(`${UPLOADS_PATH}${filename}`))
+      .on('close', () => {
+        logger.log(`Uploaded: ${filename} | mimetype: ${mimetype} | encoding: ${encoding}`);
+      })
+      .on('error', err => {
+        logger.error(`${filename} WriteStream Error`, err);
+      });
+
     return true;
   }
 
   @Mutation()
   async sampleUploadMany(@Args('files', { type: () => [GraphQLUpload] }) files: Promise<Upload>[]) {
-    const UPLOAD_PATH = './upload/';
-    if (!existsSync(UPLOAD_PATH)) {
-      Logger.log('Creating directory', UPLOAD_PATH);
-      mkdirSync(UPLOAD_PATH);
-    }
+    await createUploadDirectory();
 
-    return await Promise.all(
+    return Promise.all(
       files.map(async file => {
         const { filename, mimetype, encoding, createReadStream } = await file;
-        Logger.log('Attachment:', filename, mimetype, encoding);
-        const stream = createReadStream();
 
         return new Promise((resolve, reject) => {
-          stream
+          createReadStream()
+            .on('error', err => {
+              logger.error(`${filename} ReadStream Error`, err);
+            })
+            .pipe(createWriteStream(`${UPLOADS_PATH}${filename}`))
             .on('close', () => {
-              Logger.log(`${filename} ReadStream Closed`);
+              logger.log(`Uploaded: ${filename} | mimetype: ${mimetype} | encoding: ${encoding}`);
+              resolve(filename);
             })
             .on('error', err => {
-              Logger.error(`${filename} ReadStream Error`, err);
-            })
-            .pipe(createWriteStream(`${UPLOAD_PATH}${filename}`))
-            .on('close', () => {
-              Logger.log(`${filename} WriteStream Closed`);
-              resolve(`${filename} close`);
-            })
-            .on('error', err => {
-              Logger.error(`${filename} WriteStream Error`, err);
-              reject(`${filename} error`);
+              logger.error(`${filename} WriteStream Error`, err);
+              reject(`error ${filename}`);
             });
         });
       })
@@ -88,7 +107,7 @@ export class SampleResolver {
 
   @Subscription()
   async sampleSubscription(@CurrentUser() user: RequestUser) {
-    Logger.log(`sampleSubscription subscribed to by user with id ${user.id}`);
+    logger.log(`sampleSubscription subscribed to by user with id ${user.id}`);
     return pubSub.asyncIterator('sampleSubscription');
   }
 }

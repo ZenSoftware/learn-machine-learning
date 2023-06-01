@@ -1,4 +1,9 @@
+import { Logger } from '@nestjs/common';
+
 import { EnvironmentBase } from './environment.base';
+
+const logger = new Logger('EnvironmentProduction');
+logger.log(`loaded`);
 
 export const environment: EnvironmentBase = {
   siteUrl: 'https://site.com/#',
@@ -40,7 +45,7 @@ export const environment: EnvironmentBase = {
       },
     },
     defaults: {
-      from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+      from: process.env.SMTP_FROM_NAME,
     },
   },
   throttle: {

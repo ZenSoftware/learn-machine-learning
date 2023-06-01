@@ -1,16 +1,21 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Environment } from '@zen/common';
-import { ZenSnackbarError } from '@zen/components';
+import { ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
 import { AuthExchangeTokenGQL } from '@zen/graphql';
 
 import { AuthService } from '../auth.service';
 import { token } from '../token.signal';
 
+/**
+ * OIDC providers will redirect to this component after a successful login.
+ * A JWT is provided in the query string, which is exchanged for a session.
+ */
 @Component({
   selector: 'zen-login-confirmed',
   template: ``,
   standalone: true,
+  imports: [ZenSnackbarModule],
 })
 export class ZenLoginConfirmedComponent {
   constructor(

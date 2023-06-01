@@ -1,3 +1,5 @@
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Ability } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
@@ -11,9 +13,11 @@ import { AuthService } from '../src/lib/auth.service';
 const preview: Preview = {
   decorators: [
     moduleMetadata({
-      imports: [ApolloTestingModule, RouterTestingModule],
+      imports: [BrowserAnimationsModule, ApolloTestingModule, RouterTestingModule],
       providers: [
         { provide: Environment, useValue: EnvironmentDev },
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+
         {
           provide: Ability,
           useValue: createPrismaAbility(undefined, {

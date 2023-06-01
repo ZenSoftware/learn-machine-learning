@@ -229,6 +229,7 @@ export class AuthService {
         retry({
           delay: retryStrategy({
             excludeStatusCodes: ['FORBIDDEN', 'UNAUTHENTICATED', 'INTERNAL_SERVER_ERROR'],
+            delay: this.env.auth.retryExchangeTokenDelay,
           }),
         })
       )
